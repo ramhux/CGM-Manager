@@ -37,7 +37,26 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
       self.__date = time.strftime('%Y-%m-%d')
       self.stream.close()
       self.stream = None
+      # FIXME: baseFilename is abspath
       self.baseFilename = '{0}.{1}.log'.format(self.__prefix, self.__date)
       # Do not open stream, we expect parent classes do it when needed
       # TODO: We can gzip old log file
+
+def basicConfig(fileprefix, level=logging.INFO):
+   """
+   Wrapper to logging.basicConfig()
+
+   Add a DailyRotatingFileHandler to the root logger using fileprefix as
+   a prefix for filename. Filename is calculated as <prefix>.<date>.log
+   and is created a log file a day.
+   """
+   fmt = logging.Formatter('%(asctime)s - %(levelname)-10s - %(message)s',
+                           '%H:%M:%S')
+
+   hl = DailyRotatingFileHandler(fileprefix)
+   hl.setLevel(level)
+   hl.setFormatter(fmt)
+
+   logger = logging.getLogger('')
+   logger.addHandler(hl)
 
