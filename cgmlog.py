@@ -4,6 +4,7 @@ Logging module for CGM-Manager.
 
 import logging, logging.handlers
 import time
+import os.path
 
 # There is no logging handler with needed features, so we write one
 class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
@@ -37,9 +38,11 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
       self.__date = time.strftime('%Y-%m-%d')
       self.stream.close()
       self.stream = None
-      # FIXME: baseFilename is abspath
-      self.baseFilename = '{0}.{1}.log'.format(self.__prefix, self.__date)
-      # Do not open stream, we expect parent classes do it when needed
+      # Set baseFilename but do not open stream,
+      # we expect parent classes do it when needed
+      dirname = os.path.dirname(self.baseFilename)
+      filename = '{0}.{1}.log'.format(self.__prefix, self.__date)
+      self.baseFilename = os.path.join(dirname, filename)
       # TODO: We can gzip old log file
 
 def basicConfig(fileprefix, level=logging.INFO):
