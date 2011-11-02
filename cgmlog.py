@@ -38,7 +38,7 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
       self.__date = time.strftime('%Y-%m-%d')
       self.stream.close()
       self.stream = None
-      # Set baseFilename but do not open stream,
+      # Set new baseFilename but do not open stream,
       # we expect parent classes do it when needed
       dirname = os.path.dirname(self.baseFilename)
       filename = '{0}.{1}.log'.format(self.__prefix, self.__date)
@@ -61,5 +61,6 @@ def basicConfig(fileprefix, level=logging.INFO):
    hl.setFormatter(fmt)
 
    logger = logging.getLogger('')
+   logger.setLevel(level)
    logger.addHandler(hl)
 
