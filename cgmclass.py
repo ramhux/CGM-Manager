@@ -4,6 +4,7 @@ CGMfile Object definition
 
 import os
 import re
+import shutil
 
 def _remove(path):
    # os.remove() wrapper
@@ -36,6 +37,8 @@ class CGMfile:
       Argument is a path to a file with '.cgm' extension.
       """
       self._translator = self._translator.copy() # avoid modify class attr.
+      self._files = [] # list of temp files in working dir
+
       self.path = os.path.abspath(path)
       self.dirname, self.filename = os.path.split(self.path)
       self.name, ext = os.path.splitext(self.filename)
@@ -47,6 +50,33 @@ class CGMfile:
       for k in self._translator.keys():
          (retOk, commandlist) = self._translator[k]
          self.addTranslator(k, retOk, commandlist)
+
+   def __del__(self):
+      for f in self._files: _remove(f)
+
+   def __str__(self):
+      return self.path
+
+   def _Get(self):
+      # Copy CGM file to working dir
+      if self.filename not in self._files:
+         try:
+            shutil.copyfile(self.path, self.filename)
+         except OSError:
+            logging.exception('Cannot copy "%s" in "%s"', self.path,
+               os.getcwd())
+            raise
+         self._files.append(self.filename)
+
+   def _Put(self, ext):
+      # Copy file name.ext in CGM original dir
+      f = os.name + ext
+      if f not in self._files:
+         logging.critical('CGMfile._Put(): File "%s" was not created', f)
+      try:
+         shutil.copyfile(f, os.path.join(self.dirname, f))
+      except OSError:
+         logging.exception('Cannot copy "%s" in "%s"', f, self.dirname)
 
    def addTranslator(self, ext, retOk, commandlist):
       """
