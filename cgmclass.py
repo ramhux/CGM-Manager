@@ -45,6 +45,7 @@ class CGMfile:
       self.dirname, self.filename = os.path.split(self.path)
       self.name, ext = os.path.splitext(self.filename)
       if not re.match('.cgm', ext, re.I) or not os.path.isfile(self.path):
+         logging.warning('%s: Invalid CGM file', self.path)
          raise ValueError(path)
       self.name = re.sub('^trasp_', '', self.name, flags=re.I)
 
