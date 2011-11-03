@@ -5,6 +5,8 @@ CGMfile Object definition
 import os
 import re
 import shutil
+import logging
+import subprocess
 
 def _remove(path):
    # os.remove() wrapper
@@ -77,6 +79,49 @@ class CGMfile:
          shutil.copyfile(f, os.path.join(self.dirname, f))
       except OSError:
          logging.exception('Cannot copy "%s" in "%s"', f, self.dirname)
+         raise
+
+   def _shouldTranslate(self, ext):
+      # Check if exists filename.ext in CGM dir
+      filename = self.name + ext
+      filetrasp = 'TRASP_' + filename
+      filename = os.path.join(self.dirname, filename)
+      filetrasp = os.path.join(self.dirname, filetrasp)
+      return not (os.path.isfile(filename) or os.path.isfile(filetrasp))
+
+   def Translate(self, ext):
+      """
+      Translate the CGM file using the proper translator, if it does not
+      exist a translated version file.
+
+      Temporal files are created in working directory
+      """
+      if ext not in self._translator.keys():
+         logging.critical('CGMfile.Translate(): No translator for "%s"', ext)
+         return
+      if not self._shouldTranslate(ext):
+         return
+
+      newfile = self.name + ext
+      logging.info('Translating: "%s" -> "%s"', self.filename, newfile)
+      self._Get()
+      (retOk, command) = self._translator[ext]
+      if retOk == subprocess.call(command):
+         self._files.append(newfile)
+         self._Put()
+      else:
+         logging.error('%s: Translator returned an error', newfile)
+
+   def TranslateAll(self):
+      """
+      Translate the CGM file using every translator defined
+
+      Exceptions are logged, but not raised
+      """
+      for ext in self._translator.keys():
+         try: self.Translate(ext)
+         except:
+            logging.exception('Error inside Translate("%s")', ext)
 
    def addTranslator(self, ext, retOk, commandlist):
       """
