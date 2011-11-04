@@ -109,7 +109,7 @@ class CGMfile:
       (retOk, command) = self._translator[ext]
       if retOk == subprocess.call(command):
          self._files.append(newfile)
-         self._Put()
+         self._Put(ext)
       else:
          logging.error('%s: Translator returned an error', newfile)
 
@@ -130,9 +130,9 @@ class CGMfile:
 
       Arguments are like cgmclass.addTranslator() args.
       """
-      command = [s.format(cgmfile=self.basename, name=self.name)
+      command = [s.format(cgmfile=self.filename, name=self.name)
                   for s in commandlist]
-      self._translator[ext] = (retOk, commandlist)
+      self._translator[ext] = (retOk, command)
 
 def addTranslator(ext, retOk, commandlist):
    """
