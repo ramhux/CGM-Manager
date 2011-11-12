@@ -73,9 +73,10 @@ class CGMfile:
 
    def _Put(self, ext):
       # Copy file name.ext in CGM original dir
-      f = os.name + ext
+      f = self.name + ext
       if f not in self._files:
          logging.critical('CGMfile._Put(): File "%s" was not created', f)
+         return
       try:
          shutil.copyfile(f, os.path.join(self.dirname, f))
       except OSError:
@@ -121,7 +122,7 @@ class CGMfile:
       """
       for ext in self._translator.keys():
          try: self.Translate(ext)
-         except:
+         except: # FIXME: Several exception MUST be raised
             logging.exception('Error inside Translate("%s")', ext)
 
    def addTranslator(self, ext, retOk, commandlist):
