@@ -7,6 +7,8 @@ import re
 import shutil
 import logging
 import subprocess
+import ConfigParser
+import shlex
 
 def _remove(path):
    # os.remove() wrapper
@@ -149,4 +151,33 @@ def addTranslator(ext, retOk, commandlist):
    '{cgmfile}' is replaced by CGM file name
    '{name}' is replaced by CGM file name without extension
    """
+   logging.info('Setting "%s" translator', ext)
    CGMfile._translator[ext] = (retOk, commandlist)
+
+def addTranslatorsFromFile(filename):
+   """
+   Add a set of translators definitions as defined inside file.
+
+   File has INI-like format, with file extensions as sections and 3 key=value
+   pairs: translator, args, and success.
+   - Translator is a Win32 app path
+   - Args is a list of arguments passed to translator, separated by
+     whitespaces. You can use quotes if needed.
+   - Success is the exit status when all went well
+
+   [.ext]
+   translator = C:\\Program Files\\cgm2ext.exe
+   args = {cgmfile} {name}.ext
+   success = 0
+   """
+   logging.info('Reading translators from "%s"', filename)
+   config = ConfigParser.RawConfigParser()
+   with open(filename) as cfgfile:
+      config.readfp(cfgfile)
+
+   for ext in config.sections():
+      retOk = config.getint(ext, 'success')
+      args = config.get(ext, 'args')
+      command = shlex.split(args)
+      command.insert(0, config.get(ext, 'translator'))
+      addTranslator(ext, retOk, command)
