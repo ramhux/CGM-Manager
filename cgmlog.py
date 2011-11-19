@@ -2,7 +2,6 @@
 Logging module for CGM-Manager.
 """
 
-import logging
 import logging.handlers
 import time
 import os.path
