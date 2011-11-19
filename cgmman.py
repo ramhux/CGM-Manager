@@ -15,7 +15,7 @@ import cgmclass
 srcdir = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 def ExtFilter(path, extfilter):
-    name, ext = os.path.splitext(path)
+    ext = os.path.splitext(path)[1]
     return re.match(extfilter, ext, re.I) is not None
 
 def TranslateDir(dirname):
