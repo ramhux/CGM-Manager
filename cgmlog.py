@@ -27,7 +27,8 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
         self.__date =  time.strftime("%Y-%m-%d")
         self.__prefix = fileprefix
         filename = "{0}.{1}.log".format(self.__prefix, self.__date)
-        logging.handlers.BaseRotatingHandler.__init__(self, filename, 'a', encoding)
+        logging.handlers.BaseRotatingHandler.__init__(self, filename, 'a',
+                                                      encoding)
 
     def shouldRollover(self, record):
         'Check if date changed since last write'
