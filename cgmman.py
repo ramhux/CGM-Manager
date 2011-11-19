@@ -7,6 +7,7 @@ import sys
 import ConfigParser
 import logging
 import time
+import re
 
 import cgmlog
 import cgmclass
