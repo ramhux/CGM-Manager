@@ -8,10 +8,14 @@ import os.path
 
 # There is no logging handler with needed features, so we write one
 class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
+    
     """
-    Handler for daily rotating log files. After midnight it writes log entries
-    into a new log file so you get a logfile a day.
+    Handler for daily rotating log files.
+    
+    After midnight it writes log entries into a new log file so you get
+    a logfile a day.
     """
+
     # Interesting inherited attributes:
     # self.stream: File like Object
     # self.baseFilename = os.path.abspath(logfile)
@@ -19,9 +23,10 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
 
     def __init__(self, fileprefix, encoding=None):
         """
-        Open the file prefix.date.log and use it as destination for logging.
-
-        Rollover occurs when file date mismatch with current date.
+        Open a log file.
+        
+        The file prefix.date.log is opened for logging, and rollover occurs
+        when file date mismatch with current date.
         """
         self.__date =  time.strftime("%Y-%m-%d")
         self.__prefix = fileprefix
@@ -30,11 +35,11 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
                                                       encoding)
 
     def shouldRollover(self, record):
-        'Check if date changed since last write'
+        """Check if date changed since last write."""
         return time.strftime("%Y-%m-%d") != self.__date
 
     def doRollover(self):
-        'Close log file and open a new one based on date'
+        """Close log file and open a new one based on date."""
         self.__date = time.strftime('%Y-%m-%d')
         self.stream.close()
         self.stream = None
@@ -49,9 +54,9 @@ def basicConfig(fileprefix, level=logging.INFO):
     """
     Wrapper to logging.basicConfig()
 
-    Add a DailyRotatingFileHandler to the root logger using fileprefix as
-    a prefix for filename. Filename is calculated as <prefix>.<date>.log
-    and is created a log file a day.
+    Set a default format, add a DailyRotatingFileHandler to the root
+    logger and set log level as defined by kword level. A log file a
+    day is created as <prefix>.<date>.log.
     """
     fmt = logging.Formatter('%(asctime)s - %(levelname)-10s - %(message)s',
                             '%H:%M:%S')
