@@ -14,8 +14,8 @@ def _remove(path):
     # os.remove() wrapper
     try:
         os.remove(path)
-    except:
-        logging.exception("Cannot remove %s", path)
+    except OSError as err:
+        logging.error('Cannot remove "%s": %s', err.filename, err.strerror)
 
 class CGMfile:
     """
@@ -57,7 +57,8 @@ class CGMfile:
             self.addTranslator(k, retOk, commandlist)
 
     def __del__(self):
-        for f in self._files: _remove(f)
+        for f in self._files:
+            _remove(f)
 
     def __str__(self):
         return self.path
@@ -67,22 +68,23 @@ class CGMfile:
         if self.filename not in self._files:
             try:
                 shutil.copyfile(self.path, self.filename)
-            except OSError:
-                logging.exception('Cannot copy "%s" in "%s"', self.path,
-                                  os.getcwd())
+            except EnvironmentError as err:
+                logging.error('Cannot copy "%s" in "%s"', self.path,
+                              os.getcwd())
+                logging.error('    %s', err)
                 raise
-            self._files.append(self.filename)
+            else:
+                self._files.append(self.filename)
 
     def _Put(self, ext):
         # Copy file name.ext in CGM original dir
         f = self.name + ext
-        if f not in self._files:
-            logging.critical('CGMfile._Put(): File "%s" was not created', f)
-            return
+        assert f in self._files, '{0} not in self._files'.format(f)
         try:
             shutil.copyfile(f, os.path.join(self.dirname, f))
-        except OSError:
-            logging.exception('Cannot copy "%s" in "%s"', f, self.dirname)
+        except EnvironmentError as err:
+            logging.error('Cannot copy "%s" in "%s"', f, self.dirname)
+            logging.error('    %s', err)
             raise
 
     def _shouldTranslate(self, ext):
@@ -99,10 +101,15 @@ class CGMfile:
         exist a translated version file.
 
         Temporal files are created in working directory
+        
+        Raised exceptions:
+        - ValueError if ext is not a valid translator
+        - OSError, shutil.Error if error copying files
+        - OSError when calling external translator
         """
         if ext not in self._translator.keys():
             logging.critical('CGMfile.Translate(): No translator for "%s"', ext)
-            return
+            raise ValueError(ext)
         if not self._shouldTranslate(ext):
             return
 
@@ -123,9 +130,10 @@ class CGMfile:
         Exceptions are logged, but not raised
         """
         for ext in self._translator.keys():
-            try: self.Translate(ext)
-            except: # FIXME: Several exception MUST be raised
-                logging.exception('Error inside Translate("%s")', ext)
+            try:
+                self.Translate(ext)
+            except EnvironmentError:
+                logging.error('Cannot translate: "%s" -> "%s"', self, ext)
 
     def addTranslator(self, ext, retOk, commandlist):
         """
