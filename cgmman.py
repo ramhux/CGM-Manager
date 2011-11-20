@@ -19,14 +19,14 @@ def ExtFilter(path, extfilter):
     return re.match(extfilter, ext, re.I) is not None
 
 def TranslateDir(dirname):
-    cgmlist = [ os.path.join(dirname, f)
-        for f in os.listdir(dirname)
-        if ExtFilter(f, '.cgm') ]
-    for f in cgmlist:
+    cgmlist = [ os.path.join(dirname, fname)
+        for fname in os.listdir(dirname)
+        if ExtFilter(fname, '.cgm') ]
+    for fname in cgmlist:
         try:
-            cgm = cgmclass.CGMfile(f)
+            cgm = cgmclass.CGMfile(fname)
         except ValueError:
-            logging.warning('Invalid CGM file: %s', f)
+            pass
         else:
             cgm.TranslateAll()
 
@@ -39,11 +39,12 @@ if __name__ == '__main__':
     sleeptime = conf.getint('CGMMAN', 'sleeptime')
     loglevel = conf.get('CGMMAN', 'loglevel')
     loglevel = getattr(logging, loglevel)
-    
+
     os.chdir(workdir)
     cgmlog.basicConfig('cgmman', loglevel)
     cgmclass.addTranslatorsFromFile(os.path.join(srcdir, 'Translators.ini'))
-    
+
     while not os.path.isfile('stop'):
         TranslateDir(cgmdir)
         time.sleep(sleeptime)
+    os.remove('stop')
