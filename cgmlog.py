@@ -6,6 +6,7 @@ import logging.handlers
 import time
 import os.path
 
+
 # There is no logging handler with needed features, so we write one
 class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
     
@@ -50,14 +51,23 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
         self.baseFilename = os.path.join(dirname, filename)
         # TODO: We can gzip old log file
 
-def basicConfig(fileprefix, level=logging.INFO):
+
+def basicConfig(fileprefix, level='INFO'):
+
     """
     Wrapper to logging.basicConfig()
 
     Set a default format, add a DailyRotatingFileHandler to the root
     logger and set log level as defined by kword level. A log file a
     day is created as <prefix>.<date>.log.
+    
+    Valid log levels are DEBUG, INFO, WARNING, ERROR and CRITICAL.
+    Numerical levels are accepted.
     """
+
+    if not isinstance(level, int):
+        level = getattr(logging, level)
+
     fmt = logging.Formatter('%(asctime)s - %(levelname)-10s - %(message)s',
                             '%H:%M:%S')
 
