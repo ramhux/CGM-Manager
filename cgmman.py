@@ -30,7 +30,7 @@ def TranslateDir(dirname):
         else:
             cgm.TranslateAll()
 
-if __name__ == '__main__':
+def main():
     conf = ConfigParser.RawConfigParser()
     with open(os.path.join(srcdir, 'cgmman.ini')) as f:
         conf.readfp(f)
@@ -38,13 +38,16 @@ if __name__ == '__main__':
     workdir = conf.get('CGMMAN', 'workdir')
     sleeptime = conf.getint('CGMMAN', 'sleeptime')
     loglevel = conf.get('CGMMAN', 'loglevel')
-    loglevel = getattr(logging, loglevel)
 
     os.chdir(workdir)
     cgmlog.basicConfig('cgmman', loglevel)
     cgmclass.addTranslatorsFromFile(os.path.join(srcdir, 'Translators.ini'))
 
+    # TODO: create global try..except and log exceptions 
     while not os.path.isfile('stop'):
         TranslateDir(cgmdir)
         time.sleep(sleeptime)
     os.remove('stop')
+
+if __name__ == '__main__':
+    main()
