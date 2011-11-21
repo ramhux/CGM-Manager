@@ -12,7 +12,7 @@ import re
 import cgmlog
 import cgmclass
 
-srcdir = os.path.dirname(os.path.abspath(sys.argv[0]))
+SRC_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 def ExtFilter(path, extfilter):
     ext = os.path.splitext(path)[1]
@@ -32,7 +32,7 @@ def TranslateDir(dirname):
 
 def main():
     conf = ConfigParser.RawConfigParser()
-    with open(os.path.join(srcdir, 'cgmman.ini')) as f:
+    with open(os.path.join(SRC_DIR, 'cgmman.ini')) as f:
         conf.readfp(f)
     cgmdir = conf.get('CGMMAN', 'cgmdir')
     workdir = conf.get('CGMMAN', 'workdir')
@@ -41,13 +41,16 @@ def main():
 
     os.chdir(workdir)
     cgmlog.basicConfig('cgmman', loglevel)
-    cgmclass.addTranslatorsFromFile(os.path.join(srcdir, 'Translators.ini'))
-
-    # TODO: create global try..except and log exceptions 
-    while not os.path.isfile('stop'):
-        TranslateDir(cgmdir)
-        time.sleep(sleeptime)
-    os.remove('stop')
+    try:
+        translators = os.path.join(SRC_DIR, 'Translators.ini')
+        cgmclass.addTranslatorsFromFile(translators)
+        while not os.path.isfile('stop'):
+            TranslateDir(cgmdir)
+            time.sleep(sleeptime)
+        os.remove('stop')
+    except:
+        logging.exception('Unexpected exception')
+        raise
 
 if __name__ == '__main__':
     main()
