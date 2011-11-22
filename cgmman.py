@@ -1,6 +1,7 @@
 '''
 CGM-Manager
 '''
+# TODO: Improve logging (more verbose, uptime, start & exit...)
 
 import os
 import sys
@@ -19,9 +20,14 @@ def ExtFilter(path, extfilter):
     return re.match(extfilter, ext, re.I) is not None
 
 def TranslateDir(dirname):
-    cgmlist = [ os.path.join(dirname, fname)
-        for fname in os.listdir(dirname)
-        if ExtFilter(fname, '.cgm') ]
+    try:
+        cgmlist = [ os.path.join(dirname, fname)
+            for fname in os.listdir(dirname)
+            if ExtFilter(fname, '.cgm') ]
+    except OSError as err:
+        logging.error('Cannot list dir "%s": %s', dirname, err.strerror)
+        return
+
     for fname in cgmlist:
         try:
             cgm = cgmclass.CGMfile(fname)
