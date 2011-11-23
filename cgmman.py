@@ -54,11 +54,13 @@ def main():
     cgmlog.basicConfig('cgmman', loglevel)
 
     try:
+        logging.info('Starting CGM-Manager')
         translators = os.path.join(SRC_DIR, 'Translators.ini')
         cgmclass.addTranslatorsFromFile(translators)
         while not os.path.isfile('stop'):
             TranslateDir(cgmdir)
             time.sleep(sleeptime)
+        logging.info('Stopping CGM-Manager')
         os.remove('stop')
     except:
         logging.exception('Unexpected exception')
