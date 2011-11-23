@@ -38,15 +38,21 @@ def TranslateDir(dirname):
 
 def main():
     conf = ConfigParser.RawConfigParser()
-    with open(os.path.join(SRC_DIR, 'cgmman.ini')) as f:
-        conf.readfp(f)
-    cgmdir = conf.get('CGMMAN', 'cgmdir')
-    workdir = conf.get('CGMMAN', 'workdir')
-    sleeptime = conf.getint('CGMMAN', 'sleeptime')
-    loglevel = conf.get('CGMMAN', 'loglevel')
+
+    try:
+        conf.read(os.path.join(SRC_DIR, 'cgmman.ini'))
+        cgmdir = conf.get('CGMMAN', 'cgmdir')
+        workdir = conf.get('CGMMAN', 'workdir')
+        sleeptime = conf.getint('CGMMAN', 'sleeptime')
+        loglevel = conf.get('CGMMAN', 'loglevel')
+    except ConfigParser.Error as err:
+        print >>sys.stderr, "Error in configuration file"
+        print >>sys.stderr, err
+        sys.exit(1)
 
     os.chdir(workdir)
     cgmlog.basicConfig('cgmman', loglevel)
+
     try:
         translators = os.path.join(SRC_DIR, 'Translators.ini')
         cgmclass.addTranslatorsFromFile(translators)
