@@ -2,18 +2,21 @@
 CGM-Manager
 '''
 # TODO: Improve logging (more verbose, uptime, start & exit...)
+# TODO: hashing files and log it.
 
 import os
 import sys
 import ConfigParser
 import logging
 import time
+import datetime
 import re
 
 import cgmlog
 import cgmclass
 
 SRC_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+START_TIME = datetime.datetime.now()
 
 def ExtFilter(path, extfilter):
     ext = os.path.splitext(path)[1]
@@ -36,6 +39,9 @@ def TranslateDir(dirname):
         else:
             cgm.TranslateAll()
 
+def uptime():
+    logging.info('Running for %s', datetime.datetime.now() - START_TIME)
+
 def main():
     conf = ConfigParser.RawConfigParser()
 
@@ -50,6 +56,7 @@ def main():
         print >>sys.stderr, err
         sys.exit(1)
 
+    # TODO: create workdir if it doesn't exist
     os.chdir(workdir)
     cgmlog.basicConfig('cgmman', loglevel)
 
@@ -58,6 +65,7 @@ def main():
         translators = os.path.join(SRC_DIR, 'Translators.ini')
         cgmclass.addTranslatorsFromFile(translators)
         while not os.path.isfile('stop'):
+            uptime()
             TranslateDir(cgmdir)
             time.sleep(sleeptime)
         logging.info('Stopping CGM-Manager')
