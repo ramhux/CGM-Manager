@@ -2,6 +2,7 @@
 CGMfile Object definition
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 import re
@@ -58,7 +59,7 @@ class CGMfile:
         self.name = re.sub('^trasp_', '', self.name, flags=re.I)
 
         # Replace variables in command list
-        for k in self._translator.keys():
+        for k in list(self._translator.keys()):
             (retOk, commandlist) = self._translator[k]
             self.addTranslator(k, retOk, commandlist)
 
@@ -113,7 +114,7 @@ class CGMfile:
         - OSError, shutil.Error if error copying files
         - OSError when calling external translator
         """
-        if ext not in self._translator.keys():
+        if ext not in list(self._translator.keys()):
             logging.critical('CGMfile.Translate(): No translator for "%s"', ext)
             raise ValueError(ext)
         if not self._shouldTranslate(ext):
@@ -135,7 +136,7 @@ class CGMfile:
 
         Exceptions are logged, but not raised
         """
-        for ext in self._translator.keys():
+        for ext in list(self._translator.keys()):
             try:
                 self.Translate(ext)
             except EnvironmentError:
