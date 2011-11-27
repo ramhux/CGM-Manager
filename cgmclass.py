@@ -1,14 +1,20 @@
 """
 CGMfile Object definition
 """
+from __future__ import print_function
 
 import os
 import re
 import shutil
 import logging
 import subprocess
-import ConfigParser
 import shlex
+import sys
+
+if sys.version_info[0] == 2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
 def _remove(path):
     # os.remove() wrapper
@@ -179,7 +185,7 @@ def addTranslatorsFromFile(filename):
     success = 0
     """
     logging.info('Reading translators from "%s"', filename)
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     with open(filename) as cfgfile:
         config.readfp(cfgfile)
 
