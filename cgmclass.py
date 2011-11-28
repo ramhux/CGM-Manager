@@ -24,7 +24,7 @@ def _remove(path):
     except OSError as err:
         logging.error('Cannot remove "%s": %s', err.filename, err.strerror)
 
-class CGMfile:
+class CGMfile(object):
     """
     This class implements a CGM file identified by path and a set of methods
     for converting to other formats. Format conversion is performed by
