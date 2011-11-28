@@ -1,6 +1,8 @@
 """
 Logging module for CGM-Manager.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import logging.handlers
 import time

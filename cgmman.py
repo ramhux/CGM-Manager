@@ -4,13 +4,20 @@ CGM-Manager
 # TODO: Improve logging (more verbose, uptime, start & exit...)
 # TODO: hashing files and log it.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import os
 import sys
-import ConfigParser
 import logging
 import time
 import datetime
 import re
+
+if sys.version_info[0] == 2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
 import cgmlog
 import cgmclass
@@ -43,7 +50,7 @@ def uptime():
     logging.info('Running for %s', datetime.datetime.now() - START_TIME)
 
 def main():
-    conf = ConfigParser.RawConfigParser()
+    conf = configparser.RawConfigParser()
 
     try:
         conf.read(os.path.join(SRC_DIR, 'cgmman.ini'))
@@ -51,9 +58,9 @@ def main():
         workdir = conf.get('CGMMAN', 'workdir')
         sleeptime = conf.getint('CGMMAN', 'sleeptime')
         loglevel = conf.get('CGMMAN', 'loglevel')
-    except ConfigParser.Error as err:
-        print >>sys.stderr, "Error in configuration file"
-        print >>sys.stderr, err
+    except configparser.Error as err:
+        print("Error in configuration file", file=sys.stderr)
+        print(err, file=sys.stderr)
         sys.exit(1)
 
     # TODO: create workdir if it doesn't exist

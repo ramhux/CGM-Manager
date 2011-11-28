@@ -1,14 +1,21 @@
 """
 CGMfile Object definition
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 import re
 import shutil
 import logging
 import subprocess
-import ConfigParser
 import shlex
+import sys
+
+if sys.version_info[0] == 2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
 def _remove(path):
     # os.remove() wrapper
@@ -17,7 +24,7 @@ def _remove(path):
     except OSError as err:
         logging.error('Cannot remove "%s": %s', err.filename, err.strerror)
 
-class CGMfile:
+class CGMfile(object):
     """
     This class implements a CGM file identified by path and a set of methods
     for converting to other formats. Format conversion is performed by
@@ -52,7 +59,7 @@ class CGMfile:
         self.name = re.sub('^trasp_', '', self.name, flags=re.I)
 
         # Replace variables in command list
-        for k in self._translator.keys():
+        for k in list(self._translator.keys()):
             (retOk, commandlist) = self._translator[k]
             self.addTranslator(k, retOk, commandlist)
 
@@ -107,7 +114,7 @@ class CGMfile:
         - OSError, shutil.Error if error copying files
         - OSError when calling external translator
         """
-        if ext not in self._translator.keys():
+        if ext not in list(self._translator.keys()):
             logging.critical('CGMfile.Translate(): No translator for "%s"', ext)
             raise ValueError(ext)
         if not self._shouldTranslate(ext):
@@ -129,7 +136,7 @@ class CGMfile:
 
         Exceptions are logged, but not raised
         """
-        for ext in self._translator.keys():
+        for ext in list(self._translator.keys()):
             try:
                 self.Translate(ext)
             except EnvironmentError:
@@ -179,7 +186,7 @@ def addTranslatorsFromFile(filename):
     success = 0
     """
     logging.info('Reading translators from "%s"', filename)
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     with open(filename) as cfgfile:
         config.readfp(cfgfile)
 
