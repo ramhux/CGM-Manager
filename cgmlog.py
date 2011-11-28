@@ -42,7 +42,8 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
     def doRollover(self):
         """Close log file and open a new one based on date."""
         self.__date = time.strftime('%Y-%m-%d')
-        self.stream.close()
+        if self.stream:
+            self.stream.close()
         self.stream = None
         # Set new baseFilename but do not open stream,
         # we expect parent classes do it when needed
