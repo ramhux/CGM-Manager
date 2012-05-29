@@ -11,11 +11,14 @@ import logging
 import subprocess
 import shlex
 import sys
+import hashlib
 
 if sys.version_info[0] == 2:
     import ConfigParser as configparser
 else:
     import configparser
+
+hashing = 'md5'
 
 def _remove(path):
     # os.remove() wrapper
@@ -23,6 +26,11 @@ def _remove(path):
         os.remove(path)
     except OSError as err:
         logging.error('Cannot remove "%s": %s', err.filename, err.strerror)
+
+def _filehash(path):
+    # return string with hashing
+    filehash = hashlib.new(hashing)
+    return filehash.hexdigest()
 
 class CGMfile(object):
     """
@@ -126,6 +134,9 @@ class CGMfile(object):
         (retOk, command) = self._translator[ext]
         if retOk == subprocess.call(command):
             self._files.append(newfile)
+            logging.info('%s(%s): %s', hashing, self.filename,
+                         _filehash(self.filename))
+            logging.info('%s(%s): %s', hashing, newfile, _filehash(newfile))
             self._Put(ext)
         else:
             logging.error('%s: Translator returned an error', newfile)
