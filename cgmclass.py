@@ -29,8 +29,14 @@ def _remove(path):
 
 def _filehash(path):
     # return string with hashing
-    filehash = hashlib.new(hashing)
-    return filehash.hexdigest()
+    fh = hashlib.new(hashing)
+    with open(path, 'rb') as f:
+        while True:
+            data = f.read(1024*1024*4)
+            if not data: break
+            fh.update(data)
+    return fh.hexdigest()
+
 
 class CGMfile(object):
     """
