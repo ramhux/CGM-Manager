@@ -22,8 +22,21 @@ else:
 import cgmlog
 import cgmclass
 
+class Uptime(object):
+    """Class for logging uptime once per defined amount of seconds"""
+    def __init__(self, seconds):
+        self.start = datetime.datetime.now()
+        self.last = self.start
+        self.delta = datetime.timedelta(0, seconds)
+    def log(self):
+        now = datetime.datetime.now()
+        d = now - self.last
+        if d >= self.delta:
+            logging.info('Running for %s', now - self.start)
+            self.last = now
+
 SRC_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
-START_TIME = datetime.datetime.now()
+uptime = Uptime(3600)
 
 def ExtFilter(path, extfilter):
     ext = os.path.splitext(path)[1]
@@ -46,8 +59,6 @@ def TranslateDir(dirname):
         else:
             cgm.TranslateAll()
 
-def uptime():
-    logging.info('Running for %s', datetime.datetime.now() - START_TIME)
 
 def main():
     conf = configparser.RawConfigParser()
@@ -72,7 +83,7 @@ def main():
         translators = os.path.join(SRC_DIR, 'Translators.ini')
         cgmclass.addTranslatorsFromFile(translators)
         while not os.path.isfile('stop'):
-            uptime()
+            uptime.log()
             TranslateDir(cgmdir)
             time.sleep(sleeptime)
         logging.info('Stopping CGM-Manager')
