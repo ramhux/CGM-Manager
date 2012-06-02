@@ -7,7 +7,17 @@ from __future__ import unicode_literals
 import logging.handlers
 import time
 import os.path
+import zipfile
 
+def _archive(logfile):
+    dirname = os.path.dirname(logfile)
+    date = os.path.basename(logfile).split('.')[1]
+    z = os.path.join(dirname, 'logs', date[:7] + '.zip')
+    z = zipfile.ZipFile(z, 'a', zipfile.ZIP_DEFLATED)
+    z.write(logfile, date[-2:] + '.log')
+    z.close()
+    os.remove(logfile)
+    
 
 # There is no logging handler with needed features, so we write one
 class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
@@ -47,12 +57,12 @@ class DailyRotatingFileHandler(logging.handlers.BaseRotatingHandler):
         if self.stream:
             self.stream.close()
         self.stream = None
+        _archive(self.baseFilename)
         # Set new baseFilename but do not open stream,
         # we expect parent classes do it when needed
         dirname = os.path.dirname(self.baseFilename)
         filename = '{0}.{1}.log'.format(self.__prefix, self.__date)
         self.baseFilename = os.path.join(dirname, filename)
-        # TODO: We can gzip old log file
 
 
 def basicConfig(fileprefix, level='INFO'):
@@ -81,3 +91,7 @@ def basicConfig(fileprefix, level='INFO'):
     logger = logging.getLogger('')
     logger.setLevel(level)
     logger.addHandler(hl)
+    
+    logdir = os.path.join(os.path.dirname(fileprefix), 'logs')
+    if not os.path.isdir(logdir):
+        os.mkdir(logdir)
